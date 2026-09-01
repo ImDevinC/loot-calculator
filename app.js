@@ -40,10 +40,8 @@ function saveState() {
   );
 }
 
-const formatters = {
-  gp: (n) => `${n.toLocaleString("en-US")} gp`,
-  number: (n) => n.toLocaleString("en-US"),
-};
+const COPPER_PER_GP = 100;
+const COPPER_PER_SP = 10;
 
 const els = {
   name: document.getElementById("item-name"),
@@ -61,33 +59,42 @@ const els = {
   splitSell: document.getElementById("split-sell"),
 };
 
-function fmt(n) {
-  return formatters.gp(n);
+function fmtCoins(cp) {
+  const parts = [];
+  const gp = Math.floor(cp / COPPER_PER_GP);
+  cp -= gp * COPPER_PER_GP;
+  const sp = Math.floor(cp / COPPER_PER_SP);
+  const copper = cp - sp * COPPER_PER_SP;
+
+  if (gp) parts.push(`${gp.toLocaleString("en-US")} gp`);
+  if (sp) parts.push(`${sp} sp`);
+  if (copper) parts.push(`${copper} cp`);
+  return parts.length ? parts.join(" ") : "0 gp";
 }
 
-function totalValue() {
-  return state.items.reduce((sum, item) => sum + item.value, 0);
+function totalValueCp() {
+  return state.items.reduce((sum, item) => sum + item.value * COPPER_PER_GP, 0);
 }
 
-function sellPrice() {
-  return Math.floor(totalValue() / 2);
+function sellPriceCp() {
+  return Math.floor(totalValueCp() / 2);
 }
 
-function splitValue() {
+function splitValueCp() {
   const n = Math.max(1, state.partySize);
-  return Math.floor(totalValue() / n);
+  return Math.floor(totalValueCp() / n);
 }
 
-function splitSell() {
+function splitSellCp() {
   const n = Math.max(1, state.partySize);
-  return Math.floor(sellPrice() / n);
+  return Math.floor(sellPriceCp() / n);
 }
 
 function updateTotals() {
-  els.totalValue.textContent = fmt(totalValue());
-  els.sellPrice.textContent = fmt(sellPrice());
-  els.splitValue.textContent = fmt(splitValue());
-  els.splitSell.textContent = fmt(splitSell());
+  els.totalValue.textContent = fmtCoins(totalValueCp());
+  els.sellPrice.textContent = fmtCoins(sellPriceCp());
+  els.splitValue.textContent = fmtCoins(splitValueCp());
+  els.splitSell.textContent = fmtCoins(splitSellCp());
 }
 
 function renderList() {
@@ -121,7 +128,7 @@ function renderList() {
 
     const value = document.createElement("span");
     value.className = "value";
-    value.textContent = fmt(item.value);
+    value.textContent = `${item.value.toLocaleString("en-US")} gp`;
 
     const remove = document.createElement("button");
     remove.className = "remove";
