@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loot Calculator</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <h1 class="hero-title">LOOT<span class="accent">SPLITTER</span></h1>
+      <p class="hero-sub">Split the party's treasure. Fast.</p>
+    </header>
+
+    <main class="layout">
+      <section class="panel panel-add">
+        <h2 class="panel-title">Add Magic Item</h2>
+
+        <label class="field">
+          <span class="field-label">Name</span>
+          <input type="text" id="item-name" placeholder="e.g. Flame Tongue" autocomplete="off" />
+        </label>
+
+        <label class="field">
+          <span class="field-label">Rarity</span>
+          <select id="item-rarity">
+            <option value="common">Common (scrolls 0-1) - 100 gp</option>
+            <option value="uncommon">Uncommon (+1, scrolls 2-3) - 400 gp</option>
+            <option value="rare">Rare (+2, scrolls 4-5) - 4,000 gp</option>
+            <option value="veryRare">Very Rare (+3, scrolls 6-8) - 40,000 gp</option>
+            <option value="legendary">Legendary (scrolls 9) - 200,000 gp</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Value (gp)</span>
+          <input type="number" id="item-value" min="0" step="1" value="100" />
+        </label>
+
+        <label class="field field-check">
+          <input type="checkbox" id="item-consumable" />
+          <span class="check-label">Consumable <span class="check-hint">(worth 50% less, except spell scrolls)</span></span>
+        </label>
+
+        <button id="add-item" class="btn btn-primary btn-block">Add Item</button>
+      </section>
+
+      <section class="panel panel-list">
+        <div class="panel-head">
+          <h2 class="panel-title">Loot List</h2>
+          <button id="clear-all" class="btn btn-ghost btn-sm">Clear All</button>
+        </div>
+
+        <ul id="loot-list" class="loot-list">
+          <li class="empty-state" id="empty-state">No loot yet. Add some magic items.</li>
+        </ul>
+      </section>
+
+      <section class="panel panel-totals">
+        <h2 class="panel-title">Totals</h2>
+
+        <div class="totals">
+          <div class="total-row total-total">
+            <span>Total Value</span>
+            <span id="total-value">0 gp</span>
+          </div>
+          <div class="total-row total-sell">
+            <span>Sell Price (½)</span>
+            <span id="sell-price">0 gp</span>
+          </div>
+        </div>
+
+        <label class="field">
+          <span class="field-label">Party Members</span>
+          <input type="number" id="party-size" min="1" step="1" value="4" />
+        </label>
+
+        <div class="split">
+          <div class="split-col">
+            <span class="split-label">Share per member (total)</span>
+            <span id="split-value" class="split-value">0 gp</span>
+          </div>
+          <div class="split-col">
+            <span class="split-label">Share per member (sell)</span>
+            <span id="split-sell" class="split-value">0 gp</span>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
