@@ -16,6 +16,7 @@ const RARITY_LABELS = {
 
 const STORAGE_KEY = "loot-calculator";
 const ITEMS_DB_KEY = "loot-calculator-items";
+const ITEMS_DB_VERSION = 2;
 
 const ITEMS_API_URL =
   "https://dnd.imdevinc.com/api/items";
@@ -68,14 +69,32 @@ function saveState() {
 function loadItemDb() {
   try {
     const saved = JSON.parse(localStorage.getItem(ITEMS_DB_KEY));
-    return Array.isArray(saved) ? saved : null;
+    // Older caches stored a plain array without edition data; treat them as
+    // stale so the item database gets refetched with the (5e)/(5.5e) suffix.
+    if (
+      saved &&
+      saved.version === ITEMS_DB_VERSION &&
+      Array.isArray(saved.items)
+    ) {
+      return saved.items;
+    }
+    return null;
   } catch {
     return null;
   }
 }
 
 function saveItemDb(items) {
-  localStorage.setItem(ITEMS_DB_KEY, JSON.stringify(items));
+  localStorage.setItem(
+    ITEMS_DB_KEY,
+    JSON.stringify({ version: ITEMS_DB_VERSION, items })
+  );
+}
+
+// Items live in either the 2014 (5e) or 2024 (5.5e) ruleset. When the API
+// flags an item as legacy it belongs to 5e, otherwise assume 5.5e.
+function editionSuffix(item) {
+  return item.isLegacy === true ? "5e" : "5.5e";
 }
 
 async function fetchAllItems() {
@@ -93,8 +112,9 @@ async function fetchAllItems() {
     const batch = Array.isArray(body.data) ? body.data : [];
     for (const item of batch) {
       const rarity = normalizeRarity(item.rarity);
+      const baseName = item.name || "Unknown";
       all.push({
-        name: item.name || "Unknown",
+        name: `${baseName} (${editionSuffix(item)})`,
         rarity,
         value:
           item.cost != null ? Math.round(item.cost) : RARITY_DEFAULTS[rarity],

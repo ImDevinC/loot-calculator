@@ -5,6 +5,7 @@ A simple static website for tallying D&D loot and splitting it across a party. N
 ## Features
 
 - Add magic items by name and rarity (Common / Uncommon / Rare / Very Rare / Legendary)
+- Autocomplete item suggestions include the ruleset edition: `(5e)` for legacy items, `(5.5e)` otherwise
 - Rarity value defaults, with prices editable per item
 - Consumable items are worth 50% less (except spell scrolls)
 - Spell scroll level ranges called out per rarity
