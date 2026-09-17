@@ -17,10 +17,8 @@ const RARITY_LABELS = {
 const STORAGE_KEY = "loot-calculator";
 const ITEMS_DB_KEY = "loot-calculator-items";
 
-// D&D Beyond blocks cross-origin browser requests. Point this at a local or
-// hosted CORS proxy that forwards the path and query string unchanged.
 const ITEMS_API_URL =
-  "https://character-service.dndbeyond.com/character/v5.1/game-data/items";
+  "https://dnd.imdevinc.com/api/items";
 const ITEMS_API_PARAMS = "campaignId=7672327&sharingSetting=2";
 const ITEMS_PAGE_SIZE = 1000;
 const SUGGESTION_LIMIT = 12;
