@@ -37,10 +37,13 @@
       <section class="panel panel-add">
         <h2 class="panel-title">Add Magic Item</h2>
 
-        <label class="field">
-          <span class="field-label">Name</span>
-          <input type="text" id="item-name" placeholder="e.g. Flame Tongue" autocomplete="off" />
-        </label>
+        <div class="field">
+          <label class="field-label" for="item-name">Name</label>
+          <div class="autocomplete-wrap">
+            <input type="text" id="item-name" placeholder="e.g. Flame Tongue" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="item-suggestions" />
+            <ul id="item-suggestions" class="suggestions" role="listbox" hidden></ul>
+          </div>
+        </div>
 
         <label class="field">
           <span class="field-label">Rarity</span>
@@ -64,6 +67,7 @@
         </label>
 
         <button id="add-item" class="btn btn-primary btn-block">Add Item</button>
+        <button id="refresh-items" class="btn btn-ghost btn-sm btn-block">↻ Refresh Item Database</button>
       </section>
 
       <section class="panel panel-list">
@@ -109,6 +113,8 @@
       </section>
     </main>
   </div>
+
+  <div id="toast" class="toast" role="alert" hidden></div>
 
   <script src="app.js"></script>
 </body>
