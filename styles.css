@@ -426,6 +426,10 @@ select:focus {
   font-weight: 500;
 }
 
+.toast[hidden] {
+  display: none;
+}
+
 .toast-error {
   border-color: var(--danger);
 }
