@@ -473,9 +473,19 @@ els.clearAll.addEventListener("click", () => {
   saveState();
 });
 
-els.partySize.addEventListener("input", () => {
+function readPartySize() {
   const n = parseInt(els.partySize.value, 10);
-  state.partySize = Number.isNaN(n) || n < 1 ? 1 : n;
+  return Number.isNaN(n) || n < 1 ? 1 : n;
+}
+
+els.partySize.addEventListener("input", () => {
+  state.partySize = readPartySize();
+  updateTotals();
+  saveState();
+});
+
+els.partySize.addEventListener("blur", () => {
+  state.partySize = readPartySize();
   els.partySize.value = state.partySize;
   updateTotals();
   saveState();
