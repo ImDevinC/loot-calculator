@@ -11,6 +11,7 @@ A simple static website for tallying D&D loot and splitting it across a party. N
 - Spell scroll level ranges called out per rarity
 - Total value, sell price (half), and per-member shares (total + sell)
 - Loot list and party size persist across refreshes via `localStorage`
+- Item database refresh via a modal: upload a dndbeyond.com items JSON file (drag/drop or browse) or load the default public items
 - Neobrutalism theme
 
 ## Rarity defaults
@@ -28,6 +29,7 @@ A simple static website for tallying D&D loot and splitting it across a party. N
 1. Open `index.html` in any modern browser.
 2. Enter an item name, pick a rarity, optionally mark it consumable, and hit **Add Item**.
 3. Adjust the party size; the totals and per-member shares update automatically.
+4. Hit **Refresh Item Database** to open the import modal. Drag & drop (or browse to) an items JSON file exported from dndbeyond.com, or choose **Load Default Items** for the public list. Both replace the cached database.
 
 ## Files
 

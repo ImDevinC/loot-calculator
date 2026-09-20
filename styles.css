@@ -405,6 +405,140 @@ select:focus {
   margin-top: 12px;
 }
 
+/* Modal */
+body.modal-open {
+  overflow: hidden;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.modal[hidden] {
+  display: none;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(28, 41, 60, 0.6);
+}
+
+.modal-dialog {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  background: var(--surface);
+  border: 3px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  padding: 24px;
+}
+
+.modal-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.modal-text {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 28px 16px;
+  border: 3px dashed var(--border);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.06s ease, border-color 0.06s ease;
+}
+
+.dropzone:hover,
+.dropzone:focus-visible,
+.dropzone.dragover {
+  background: #fffbe6;
+  border-color: var(--secondary);
+  outline: none;
+}
+
+.dropzone.dragover {
+  border-style: solid;
+}
+
+.dropzone-icon {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--secondary);
+  line-height: 1;
+}
+
+.dropzone-text {
+  font-weight: 700;
+}
+
+.dropzone-hint {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.file-name {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.75rem;
+  margin: 12px 0 0;
+  word-break: break-all;
+  color: #6b7280;
+}
+
+.modal-error {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border: 2px solid var(--danger);
+  border-radius: 6px;
+  background: #fef2f2;
+  color: var(--danger);
+  font-size: 0.85rem;
+}
+
+.modal-error[hidden] {
+  display: none;
+}
+
+.modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-actions .btn {
+  flex: 1 1 auto;
+}
+
+.modal-actions .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
 /* Toast */
 .toast {
   position: fixed;

@@ -97,6 +97,24 @@ function editionSuffix(item) {
   return item.isLegacy === true ? "5e" : "5.5e";
 }
 
+function mapRawItem(item) {
+  const rarity = normalizeRarity(item.rarity);
+  const baseName = item.name || "Unknown";
+  return {
+    name: `${baseName} (${editionSuffix(item)})`,
+    rarity,
+    value: item.cost != null ? Math.round(item.cost) : RARITY_DEFAULTS[rarity],
+  };
+}
+
+// Uploaded files are dndbeyond.com API responses: { data: [...] }.
+function parseItemPayload(payload) {
+  if (!payload || !Array.isArray(payload.data)) {
+    throw new Error('Expected a dndbeyond items file with a "data" array.');
+  }
+  return payload.data.map(mapRawItem);
+}
+
 async function fetchAllItems() {
   const all = [];
   let page = 0;
@@ -110,16 +128,7 @@ async function fetchAllItems() {
     if (!body.success) throw new Error(body.message || "API error");
 
     const batch = Array.isArray(body.data) ? body.data : [];
-    for (const item of batch) {
-      const rarity = normalizeRarity(item.rarity);
-      const baseName = item.name || "Unknown";
-      all.push({
-        name: `${baseName} (${editionSuffix(item)})`,
-        rarity,
-        value:
-          item.cost != null ? Math.round(item.cost) : RARITY_DEFAULTS[rarity],
-      });
-    }
+    all.push(...batch.map(mapRawItem));
 
     const total = body.pagination?.total ?? all.length;
     page++;
@@ -127,6 +136,12 @@ async function fetchAllItems() {
   }
 
   return all;
+}
+
+function applyItemDb(items, source) {
+  itemDb = items;
+  saveItemDb(itemDb);
+  showToast(`Item database loaded: ${itemDb.length} items (${source}).`, "success");
 }
 
 async function initItemDb() {
@@ -141,12 +156,6 @@ async function initItemDb() {
   } catch {
     showToast("Could not load the item database. You can still add items by hand.");
   }
-}
-
-async function refreshItemDb() {
-  itemDb = await fetchAllItems();
-  saveItemDb(itemDb);
-  showToast(`Item database refreshed (${itemDb.length} items).`, "success");
 }
 
 const COPPER_PER_GP = 100;
@@ -169,6 +178,15 @@ const els = {
   suggestions: document.getElementById("item-suggestions"),
   refreshItems: document.getElementById("refresh-items"),
   toast: document.getElementById("toast"),
+  modal: document.getElementById("refresh-modal"),
+  modalBackdrop: document.getElementById("refresh-backdrop"),
+  dropzone: document.getElementById("item-dropzone"),
+  fileInput: document.getElementById("item-file"),
+  fileName: document.getElementById("item-file-name"),
+  modalError: document.getElementById("modal-error"),
+  modalSubmit: document.getElementById("modal-submit"),
+  modalDefault: document.getElementById("modal-default"),
+  modalCancel: document.getElementById("modal-cancel"),
 };
 
 function fmtCoins(cp) {
@@ -452,18 +470,131 @@ els.suggestions.addEventListener("mousedown", (e) => {
   chooseSuggestion(Number(li.dataset.index));
 });
 
-els.refreshItems.addEventListener("click", async () => {
-  els.refreshItems.disabled = true;
-  const label = els.refreshItems.textContent;
-  els.refreshItems.textContent = "Loading…";
-  try {
-    await refreshItemDb();
-  } catch {
-    showToast("Could not refresh the item database. Please try again.");
-  } finally {
-    els.refreshItems.disabled = false;
-    els.refreshItems.textContent = label;
+let pendingFile = null;
+let lastFocused = null;
+
+function setModalError(message) {
+  els.modalError.textContent = message || "";
+  els.modalError.hidden = !message;
+}
+
+function resetModal() {
+  pendingFile = null;
+  els.fileInput.value = "";
+  els.fileName.textContent = "No file selected";
+  els.modalSubmit.disabled = true;
+  setModalError("");
+}
+
+function openRefreshModal() {
+  resetModal();
+  lastFocused = document.activeElement;
+  els.modal.hidden = false;
+  document.body.classList.add("modal-open");
+  els.dropzone.focus();
+}
+
+function closeRefreshModal() {
+  els.modal.hidden = true;
+  document.body.classList.remove("modal-open");
+  resetModal();
+  if (lastFocused && typeof lastFocused.focus === "function") {
+    lastFocused.focus();
   }
+}
+
+function selectFile(file) {
+  if (!file) return;
+  if (!/\.json$/i.test(file.name)) {
+    setModalError("Please choose a .json file exported from dndbeyond.com.");
+    return;
+  }
+  pendingFile = file;
+  els.fileName.textContent = file.name;
+  els.modalSubmit.disabled = false;
+  setModalError("");
+}
+
+async function submitUpload() {
+  if (!pendingFile) return;
+  els.modalSubmit.disabled = true;
+  setModalError("");
+  try {
+    const text = await pendingFile.text();
+    const items = parseItemPayload(JSON.parse(text));
+    if (items.length === 0) throw new Error("That file contains no items.");
+    applyItemDb(items, pendingFile.name);
+    closeRefreshModal();
+  } catch (err) {
+    setModalError(err.message || "Could not read that file.");
+    els.modalSubmit.disabled = false;
+  }
+}
+
+async function loadDefaultItems() {
+  els.modalDefault.disabled = true;
+  els.modalSubmit.disabled = true;
+  const label = els.modalDefault.textContent;
+  els.modalDefault.textContent = "Loading…";
+  setModalError("");
+  try {
+    applyItemDb(await fetchAllItems(), "default");
+    closeRefreshModal();
+  } catch {
+    setModalError("Could not load the default item database. Please try again.");
+  } finally {
+    els.modalDefault.disabled = false;
+    els.modalDefault.textContent = label;
+    els.modalSubmit.disabled = !pendingFile;
+  }
+}
+
+els.refreshItems.addEventListener("click", openRefreshModal);
+els.modalCancel.addEventListener("click", closeRefreshModal);
+els.modalBackdrop.addEventListener("click", closeRefreshModal);
+els.modalSubmit.addEventListener("click", submitUpload);
+els.modalDefault.addEventListener("click", loadDefaultItems);
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !els.modal.hidden) closeRefreshModal();
+});
+
+els.dropzone.addEventListener("click", () => els.fileInput.click());
+// The input lives inside the dropzone; without this its programmatic click
+// bubbles back and re-triggers the handler infinitely.
+els.fileInput.addEventListener("click", (e) => e.stopPropagation());
+els.dropzone.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" || e.key === " ") {
+    e.preventDefault();
+    els.fileInput.click();
+  }
+});
+
+els.fileInput.addEventListener("change", () => {
+  selectFile(els.fileInput.files[0]);
+});
+
+["dragenter", "dragover"].forEach((type) => {
+  els.dropzone.addEventListener(type, (e) => {
+    e.preventDefault();
+    els.dropzone.classList.add("dragover");
+  });
+});
+
+// Keep a stray drop anywhere on the modal from navigating the browser to the file.
+["dragover", "drop"].forEach((type) => {
+  els.modal.addEventListener(type, (e) => e.preventDefault());
+});
+
+["dragleave", "dragend", "drop"].forEach((type) => {
+  els.dropzone.addEventListener(type, (e) => {
+    e.preventDefault();
+    els.dropzone.classList.remove("dragover");
+  });
+});
+
+els.dropzone.addEventListener("drop", (e) => {
+  selectFile(e.dataTransfer?.files?.[0]);
 });
 
 els.clearAll.addEventListener("click", () => {
