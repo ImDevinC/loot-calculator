@@ -114,6 +114,34 @@
     </main>
   </div>
 
+  <div id="refresh-modal" class="modal" hidden>
+    <div id="refresh-backdrop" class="modal-backdrop"></div>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="refresh-modal-title">
+      <h2 id="refresh-modal-title" class="modal-title">Refresh Item Database</h2>
+      <p class="modal-text">
+        dndbeyond.com locks some items behind authentication, so they need a
+        signed-in export. Upload an items JSON file to load the full list, or
+        load the default (public) items.
+      </p>
+
+      <div id="item-dropzone" class="dropzone" role="button" tabindex="0" aria-label="Upload an items JSON file">
+        <span class="dropzone-icon" aria-hidden="true">↥</span>
+        <span class="dropzone-text">Drag &amp; drop items.json here</span>
+        <span class="dropzone-hint">or click to browse</span>
+        <input type="file" id="item-file" accept=".json,application/json" hidden />
+      </div>
+
+      <p id="item-file-name" class="file-name">No file selected</p>
+      <p id="modal-error" class="modal-error" role="alert" hidden></p>
+
+      <div class="modal-actions">
+        <button id="modal-submit" class="btn btn-primary" disabled>Upload File</button>
+        <button id="modal-default" class="btn btn-ghost">Load Default Items</button>
+        <button id="modal-cancel" class="btn btn-ghost">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast" role="alert" hidden></div>
 
   <script src="app.js"></script>
